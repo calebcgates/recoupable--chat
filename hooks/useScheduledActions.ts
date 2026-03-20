@@ -6,17 +6,19 @@ type ScheduledAction = Tables<"scheduled_actions">;
 
 interface UseScheduledActionsParams {
   artistAccountId?: string;
+  accountIdOverride?: string;
 }
 
 export const useScheduledActions = ({
   artistAccountId,
+  accountIdOverride,
 }: UseScheduledActionsParams) => {
   return useQuery<ScheduledAction[]>({
-    queryKey: ["scheduled-actions", { artistAccountId }],
+    queryKey: ["scheduled-actions", { artistAccountId, accountIdOverride }],
     queryFn: () =>
       getTasks({
+        ...(accountIdOverride ? { account_id: accountIdOverride } : {}),
         ...(artistAccountId ? { artist_account_id: artistAccountId } : {}),
       }),
-    enabled: Boolean(artistAccountId),
   });
 };
