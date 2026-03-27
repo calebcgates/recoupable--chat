@@ -14,7 +14,7 @@ export function useSandboxFileDrop({
   filetree,
   refetch,
 }: {
-  selectedPath: string | null;
+  selectedPath: string | null | undefined;
   filetree: FileNode[];
   refetch: () => void;
 }) {
