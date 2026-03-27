@@ -36,15 +36,16 @@ export async function uploadSandboxFiles({
   path?: string;
   message?: string;
 }): Promise<{ uploaded: UploadedFile[]; errors?: string[] }> {
-  const blobFiles: { url: string; name: string }[] = [];
-
-  for (const file of files) {
-    const blob = await upload(file.name, file, {
-      access: "public",
-      handleUploadUrl: "/api/sandbox-upload",
-    });
-    blobFiles.push({ url: blob.url, name: file.name });
-  }
+  const blobFiles = await Promise.all(
+    files.map(async (file) => {
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/sandbox/upload",
+        clientPayload: JSON.stringify({ token: accessToken }),
+      });
+      return { url: blob.url, name: file.name };
+    }),
+  );
 
   const response = await fetch(`${NEW_API_BASE_URL}/api/sandboxes/files`, {
     method: "POST",
