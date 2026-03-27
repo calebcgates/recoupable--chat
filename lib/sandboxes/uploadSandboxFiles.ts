@@ -1,4 +1,5 @@
 import { NEW_API_BASE_URL } from "@/lib/consts";
+import { upload } from "@vercel/blob/client";
 
 interface UploadedFile {
   path: string;
@@ -13,7 +14,10 @@ interface UploadSandboxFilesResponse {
 }
 
 /**
- * Uploads files to the sandbox GitHub repository via POST /api/sandboxes/files.
+ * Uploads files to the sandbox GitHub repository.
+ * Files are first uploaded to Vercel Blob via client-side upload,
+ * then blob URLs are sent to the API which commits them to GitHub
+ * and cleans up the blobs.
  *
  * @param accessToken - The Privy access token for authentication
  * @param files - Array of File objects to upload
@@ -32,26 +36,27 @@ export async function uploadSandboxFiles({
   path?: string;
   message?: string;
 }): Promise<{ uploaded: UploadedFile[]; errors?: string[] }> {
-  const formData = new FormData();
+  const blobFiles: { url: string; name: string }[] = [];
 
   for (const file of files) {
-    formData.append("files", file);
-  }
-
-  if (path) {
-    formData.append("path", path);
-  }
-
-  if (message) {
-    formData.append("message", message);
+    const blob = await upload(file.name, file, {
+      access: "public",
+      handleUploadUrl: "/api/sandbox-upload",
+    });
+    blobFiles.push({ url: blob.url, name: file.name });
   }
 
   const response = await fetch(`${NEW_API_BASE_URL}/api/sandboxes/files`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
-    body: formData,
+    body: JSON.stringify({
+      files: blobFiles,
+      path,
+      message,
+    }),
   });
 
   const data: UploadSandboxFilesResponse = await response.json();
