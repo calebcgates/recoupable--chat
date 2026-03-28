@@ -65,6 +65,7 @@ export default function SandboxFileTree() {
         <SandboxFilePreview
           selectedPath={fileContent.selectedPath}
           content={fileContent.content}
+          imageUrl={fileContent.imageUrl}
           loading={fileContent.loading}
           error={fileContent.error}
         />
