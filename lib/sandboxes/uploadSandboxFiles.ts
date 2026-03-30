@@ -36,7 +36,7 @@ export async function uploadSandboxFiles({
   path?: string;
   message?: string;
 }): Promise<{ uploaded: UploadedFile[]; errors?: string[] }> {
-  const blobFiles = await Promise.all(
+  const results = await Promise.allSettled(
     files.map(async (file) => {
       const blob = await upload(file.name, file, {
         access: "public",
@@ -46,6 +46,23 @@ export async function uploadSandboxFiles({
       return { url: blob.url, name: file.name };
     }),
   );
+
+  const blobFiles: { url: string; name: string }[] = [];
+  const blobErrors: string[] = [];
+
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled") {
+      blobFiles.push(r.value);
+    } else {
+      blobErrors.push(`${files[i].name}: ${r.reason?.message || "Upload failed"}`);
+    }
+  });
+
+  if (blobFiles.length === 0) {
+    throw new Error(
+      blobErrors[0] || "Failed to upload files to temporary storage",
+    );
+  }
 
   const response = await fetch(`${NEW_API_BASE_URL}/api/sandboxes/files`, {
     method: "POST",
@@ -66,8 +83,10 @@ export async function uploadSandboxFiles({
     throw new Error(data.error || "Failed to upload files");
   }
 
+  const allErrors = [...blobErrors, ...(data.errors || [])];
+
   return {
     uploaded: data.uploaded || [],
-    errors: data.errors,
+    ...(allErrors.length > 0 && { errors: allErrors }),
   };
 }
