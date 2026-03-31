@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
 import type { Conversation } from "@/types/Chat";
 import type { ArtistAgent } from "@/lib/supabase/getArtistAgents";
-import { useAccessToken } from "@/hooks/useAccessToken";
-import { useApiOverride } from "@/hooks/useApiOverride";
-import { NEW_API_BASE_URL } from "@/lib/consts";
+import { useDeleteChat } from "@/hooks/useDeleteChat";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -23,10 +21,8 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
   const [deletingProgress, setDeletingProgress] = useState<{ current: number; total: number } | null>(null);
-  const accessToken = useAccessToken();
-  const apiOverride = useApiOverride();
-  const baseUrl = apiOverride || NEW_API_BASE_URL;
-  
+  const { deleteChat, isAuthenticated } = useDeleteChat();
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
@@ -39,22 +35,22 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-  
+
   // Determine if this is bulk delete or single delete
   const isBulkDelete = chatRooms && chatRooms.length > 0;
   const chatsToDelete = isBulkDelete ? chatRooms : (chatRoom ? [chatRoom] : []);
-  
+
   if (!isOpen || chatsToDelete.length === 0) return null;
-  
+
   const chatCount = chatsToDelete.length;
   const isSingleDelete = chatCount === 1;
   const chatName = isSingleDelete ? getChatName(chatsToDelete[0]) : `${chatCount} chats`;
-  const buttonText = isDeleting 
-    ? (deletingProgress ? `Deleting ${deletingProgress.current}/${deletingProgress.total}...` : 'Deleting...') 
+  const buttonText = isDeleting
+    ? (deletingProgress ? `Deleting ${deletingProgress.current}/${deletingProgress.total}...` : 'Deleting...')
     : 'Delete';
-  
+
   const handleDelete = async () => {
-    if (!accessToken) {
+    if (!isAuthenticated) {
       setError("Authentication token is missing. Please refresh and try again.");
       return;
     }
@@ -62,37 +58,23 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
     setIsDeleting(true);
     setError("");
     setDeletingProgress({ current: 0, total: chatCount });
-    
+
     try {
       const failedChats: string[] = [];
-      
+
       // Delete each chat sequentially
       for (let i = 0; i < chatsToDelete.length; i++) {
         const chat = chatsToDelete[i];
         setDeletingProgress({ current: i + 1, total: chatCount });
-        
+
         try {
-          const roomId = getChatId(chat);
-          const response = await fetch(`${baseUrl}/api/chats`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ id: roomId }),
-          });
-          
-          const result = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(result.message || result.error || "Failed to delete chat");
-          }
+          await deleteChat(getChatId(chat));
         } catch (chatError) {
           console.error(`Error deleting chat ${getChatName(chat)}:`, chatError);
           failedChats.push(getChatName(chat));
         }
       }
-      
+
       // If some deletions failed, show error
       if (failedChats.length > 0) {
         setError(`Failed to delete: ${failedChats.join(', ')}`);
@@ -102,10 +84,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
         await onDelete();
         return;
       }
-      
+
       // Call the onDelete callback to update the UI and wait for it to complete
       await onDelete();
-      
+
       // Only close the modal after deletion and UI refresh are complete
       onClose();
     } catch (error) {
@@ -132,13 +114,13 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
         <p className="mb-5 text-base">
           Are you sure you want to delete {isSingleDelete ? `"${chatName}"` : chatName}? This action cannot be undone.
         </p>
-        
+
         {error && (
           <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
             {error}
           </div>
         )}
-        
+
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
@@ -165,4 +147,4 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
   );
 };
 
-export default DeleteConfirmationModal; 
+export default DeleteConfirmationModal;
