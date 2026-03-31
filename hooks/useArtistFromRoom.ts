@@ -20,8 +20,7 @@ export function useArtistFromRoom(roomId: string) {
   
   useEffect(() => {
     if (hasRun.current || !roomId || !userData?.id || !accessToken) return;
-    hasRun.current = true;
-    
+
     (async () => {
       try {
         const response = await fetch(`${baseUrl}/api/chats/${encodeURIComponent(roomId)}/artist`, {
@@ -29,8 +28,9 @@ export function useArtistFromRoom(roomId: string) {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        
+
         if (!response.ok) return;
+        hasRun.current = true;
         const data = await response.json();
 
         if (!data.artist_id || selectedArtist?.account_id === data.artist_id) return;
