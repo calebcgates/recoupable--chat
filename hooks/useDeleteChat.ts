@@ -1,36 +1,27 @@
-import { useAccessToken } from "@/hooks/useAccessToken";
+import { useMutation } from "@tanstack/react-query";
+import { usePrivy } from "@privy-io/react-auth";
 import { useApiOverride } from "@/hooks/useApiOverride";
-import { NEW_API_BASE_URL } from "@/lib/consts";
+import { deleteChat } from "@/lib/chats/deleteChat";
 
 /**
- * Deletes a chat by ID via the API service.
- * Returns a hook with a deleteChat function.
+ * Hook to delete a chat by ID using TanStack Query mutation.
  */
 export function useDeleteChat() {
-  const accessToken = useAccessToken();
+  const { getAccessToken } = usePrivy();
   const apiOverride = useApiOverride();
-  const baseUrl = apiOverride || NEW_API_BASE_URL;
 
-  const deleteChat = async (roomId: string): Promise<void> => {
-    if (!accessToken) {
-      throw new Error("Authentication token is missing. Please refresh and try again.");
-    }
+  const mutation = useMutation({
+    mutationFn: async (roomId: string) => {
+      const accessToken = await getAccessToken();
+      if (!accessToken) {
+        throw new Error("Authentication token is missing. Please refresh and try again.");
+      }
+      return deleteChat(roomId, accessToken, apiOverride ?? undefined);
+    },
+  });
 
-    const response = await fetch(`${baseUrl}/api/chats`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ id: roomId }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Failed to delete chat");
-    }
+  return {
+    deleteChat: mutation.mutateAsync,
+    isDeleting: mutation.isPending,
   };
-
-  return { deleteChat, isAuthenticated: !!accessToken };
 }

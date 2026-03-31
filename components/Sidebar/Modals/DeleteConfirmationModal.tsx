@@ -18,17 +18,14 @@ const getChatName = (item: Conversation | ArtistAgent): string => isChatRoom(ite
 const getChatId = (item: Conversation | ArtistAgent): string => isChatRoom(item) ? item.id : item.agentId;
 
 const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelete }: DeleteConfirmationModalProps) => {
-  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState("");
   const [deletingProgress, setDeletingProgress] = useState<{ current: number; total: number } | null>(null);
-  const { deleteChat, isAuthenticated } = useDeleteChat();
+  const { deleteChat, isDeleting } = useDeleteChat();
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
-      // Small delay to prevent visual flicker if modal is reopened quickly
       const timer = setTimeout(() => {
-        setIsDeleting(false);
         setError("");
         setDeletingProgress(null);
       }, 200);
@@ -50,19 +47,12 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
     : 'Delete';
 
   const handleDelete = async () => {
-    if (!isAuthenticated) {
-      setError("Authentication token is missing. Please refresh and try again.");
-      return;
-    }
-
-    setIsDeleting(true);
     setError("");
     setDeletingProgress({ current: 0, total: chatCount });
 
     try {
       const failedChats: string[] = [];
 
-      // Delete each chat sequentially
       for (let i = 0; i < chatsToDelete.length; i++) {
         const chat = chatsToDelete[i];
         setDeletingProgress({ current: i + 1, total: chatCount });
@@ -75,30 +65,22 @@ const DeleteConfirmationModal = ({ isOpen, onClose, chatRoom, chatRooms, onDelet
         }
       }
 
-      // If some deletions failed, show error
       if (failedChats.length > 0) {
         setError(`Failed to delete: ${failedChats.join(', ')}`);
-        setIsDeleting(false);
         setDeletingProgress(null);
-        // Still call onDelete to refresh the list
         await onDelete();
         return;
       }
 
-      // Call the onDelete callback to update the UI and wait for it to complete
       await onDelete();
-
-      // Only close the modal after deletion and UI refresh are complete
       onClose();
     } catch (error) {
       console.error('Error deleting chats:', error);
       setError(error instanceof Error ? error.message : 'Failed to delete chats. Please try again.');
-      setIsDeleting(false);
       setDeletingProgress(null);
     }
   };
 
-  // Don't allow closing the modal during deletion
   const handleModalClose = () => {
     if (!isDeleting) {
       onClose();
