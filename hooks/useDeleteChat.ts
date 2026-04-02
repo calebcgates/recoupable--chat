@@ -18,10 +18,14 @@ export function useDeleteChat() {
       }
       return deleteChat(roomId, accessToken, apiOverride ?? undefined);
     },
+    onError: (error) => {
+      console.error("Delete chat failed:", error);
+    },
   });
 
   return {
     deleteChat: mutation.mutateAsync,
     isDeleting: mutation.isPending,
+    error: mutation.error,
   };
 }

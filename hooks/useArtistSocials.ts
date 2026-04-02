@@ -5,7 +5,7 @@ import { useArtistProvider } from "@/providers/ArtistProvider";
 export function useArtistSocials() {
   const { selectedArtist } = useArtistProvider();
   const artist_account_id = selectedArtist?.account_id;
-  const { data: socialsData } = useQuery({
+  const { data: socialsData, error } = useQuery({
     queryKey: ["artistSocials", artist_account_id],
     queryFn: () =>
       artist_account_id
@@ -20,5 +20,5 @@ export function useArtistSocials() {
       s.profile_url?.toLowerCase().includes("instagram.com")
     ) ?? false;
 
-  return { socialsData, hasInstagram };
+  return { socialsData, hasInstagram, error };
 }

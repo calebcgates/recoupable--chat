@@ -15,6 +15,7 @@ interface UseApiKeyReturn {
   apiKeys: ApiKey[];
   loadingKeys: boolean;
   deleteApiKey: (keyId: string) => Promise<void>;
+  queryError: Error | null;
 }
 
 export default function useApiKey(): UseApiKeyReturn {
@@ -26,7 +27,7 @@ export default function useApiKey(): UseApiKeyReturn {
 
   const queryKey = ["apiKeys", userData?.account_id] as const;
 
-  const { data: apiKeys = [], isLoading: loadingKeys } = useQuery<ApiKey[]>({
+  const { data: apiKeys = [], isLoading: loadingKeys, error: queryError } = useQuery<ApiKey[]>({
     queryKey,
     queryFn: async () => {
       const accessToken = await getAccessToken();
@@ -94,5 +95,6 @@ export default function useApiKey(): UseApiKeyReturn {
     apiKeys,
     loadingKeys,
     deleteApiKey: deleteApiKeyHandler,
+    queryError,
   };
 }

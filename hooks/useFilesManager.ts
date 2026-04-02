@@ -24,7 +24,7 @@ export default function useFilesManager(activePath?: string, recursive: boolean 
   const [status, setStatus] = useState<string>("");
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery<{ files: Array<ListedFileRow> }>({
+  const { data, isLoading, error } = useQuery<{ files: Array<ListedFileRow> }>({
     queryKey: ["files", ownerAccountId, artistAccountId, activePath, recursive],
     queryFn: async () => {
       // Transform full storage path to relative path for API
@@ -84,6 +84,9 @@ export default function useFilesManager(activePath?: string, recursive: boolean 
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["files", ownerAccountId, artistAccountId] });
+    },
+    onError: (err) => {
+      console.error("Failed to create folder:", err);
     },
   });
 
@@ -165,9 +168,12 @@ export default function useFilesManager(activePath?: string, recursive: boolean 
     status,
     setStatus,
     isLoading,
+    error,
     files: data?.files || [],
     handleUpload,
     createFolder: (name: string) => createFolderMutation.mutateAsync(name),
+    createFolderIsError: createFolderMutation.isError,
+    createFolderError: createFolderMutation.error,
     refreshFiles: async () => {
       await qc.invalidateQueries({ queryKey: ["files", ownerAccountId, artistAccountId] });
     },

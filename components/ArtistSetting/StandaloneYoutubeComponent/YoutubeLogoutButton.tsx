@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useYoutubeStatus from "@/hooks/useYoutubeStatus";
+import { toast } from "sonner";
 
 const YoutubeLogoutButton = ({
   artistAccountId,
@@ -19,6 +20,9 @@ const YoutubeLogoutButton = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["youtube-status", artistAccountId] });
       queryClient.invalidateQueries({ queryKey: ["youtube-channel-info", artistAccountId] });
+    },
+    onError: () => {
+      toast.error("Failed to disconnect YouTube");
     },
   });
 

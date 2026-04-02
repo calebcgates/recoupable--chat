@@ -11,6 +11,7 @@ import { useState } from "react";
 import { type CreateAgentFormData } from "./schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserProvider } from "@/providers/UserProvder";
+import { toast } from "sonner";
 
 interface CreateAgentDialogProps {
   children: React.ReactNode;
@@ -37,6 +38,9 @@ const CreateAgentDialog = ({ children }: CreateAgentDialogProps) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agent-templates"] });
       setOpen(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create agent");
     },
   });
 

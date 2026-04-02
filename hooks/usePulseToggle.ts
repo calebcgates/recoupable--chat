@@ -10,7 +10,7 @@ export function usePulseToggle() {
   const accessToken = useAccessToken();
   const queryClient = useQueryClient();
 
-  const { data, isLoading: isInitialLoading } = useQuery({
+  const { data, isLoading: isInitialLoading, error: queryError } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => getPulse({ accessToken: accessToken! }),
     enabled: !!accessToken,
@@ -48,5 +48,6 @@ export function usePulseToggle() {
     isInitialLoading,
     isToggling,
     togglePulse: mutate,
+    queryError,
   };
 }

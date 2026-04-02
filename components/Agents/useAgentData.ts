@@ -15,7 +15,7 @@ export function useAgentData() {
   const [showAllTags, setShowAllTags] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
 
-  const { data, isPending } = useQuery<Agent[]>({
+  const { data, isPending, error } = useQuery<Agent[]>({
     queryKey: ["agent-templates"],
     queryFn: () => fetchAgentTemplates(userData!),
     retry: 1,
@@ -84,5 +84,6 @@ export function useAgentData() {
     isPrivate,
     togglePrivate,
     prefetchAgents,
+    error,
   };
 }

@@ -31,6 +31,7 @@ const useConversations = () => {
     isLoading,
     isFetching,
     refetch,
+    error,
   } = useQuery<Conversation[]>({
     queryKey,
     queryFn: () => getConversations(accessToken as string),
@@ -114,6 +115,7 @@ const useConversations = () => {
     conversations,
     isLoading,
     isFetching,
+    error,
   };
 };
 

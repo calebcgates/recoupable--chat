@@ -17,7 +17,7 @@ export function useArtistFromRoom(roomId: string) {
   const { selectedArtist, artists, setSelectedArtist, getArtists } = useArtistProvider();
   const apiOverride = useApiOverride();
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["chatArtist", roomId],
     queryFn: async () => {
       const accessToken = await getAccessToken();
@@ -28,6 +28,12 @@ export function useArtistFromRoom(roomId: string) {
     staleTime: Infinity,
     retry: 2,
   });
+
+  useEffect(() => {
+    if (error) {
+      console.error("Failed to load artist for room:", error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!data?.artist_id || selectedArtist?.account_id === data.artist_id) return;

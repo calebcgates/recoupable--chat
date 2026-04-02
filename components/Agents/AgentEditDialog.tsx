@@ -13,6 +13,7 @@ import CreateAgentForm from "./CreateAgentForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserProvider } from "@/providers/UserProvder";
 import type { AgentTemplateRow } from "@/types/AgentTemplates";
+import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
 interface AgentEditDialogProps {
@@ -59,6 +60,9 @@ const AgentEditDialog: React.FC<AgentEditDialogProps> = ({ agent }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agent-templates"] });
       setOpen(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to update agent");
     },
   });
 

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUserProvider } from "@/providers/UserProvder";
+import { toast } from "sonner";
 
 interface AgentDeleteButtonProps {
   id: string;
@@ -37,6 +38,9 @@ const AgentDeleteButton: React.FC<AgentDeleteButtonProps> = ({ id, creatorId }) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agent-templates"] });
+    },
+    onError: () => {
+      toast.error("Failed to delete agent");
     },
   });
 
