@@ -60,3 +60,7 @@ supabase/.temp.cursor/
 *storybook.log
 storybook-static
 supabase/.temp/
+
+# bc-fix session files
+.bc-fix-state.json
+.bc-fix-continuation.md
