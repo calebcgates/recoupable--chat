@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "suppressions": [
+    {
+      "fingerprint": "7f8995c64c39bf38f563e9fa62adc123",
+      "package": "@tanstack/react-query",
+      "postconditionId": "query-error-unhandled",
+      "filePath": "components/Agents/AgentCreator.tsx",
+      "lineNumber": 21,
+      "reason": "useQuery error is surfaced via the `error` return value (destructured on same line). React Query catches queryFn throws internally and exposes them through error state — try-catch is neither needed nor idiomatic. The scanner's try-catch postcondition does not apply to React Query hooks.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    },
+    {
+      "fingerprint": "3861592a9ae57e2a487512d205f8364a",
+      "package": "@tanstack/react-query",
+      "postconditionId": "query-error-unhandled",
+      "filePath": "app/access/page.tsx",
+      "lineNumber": 28,
+      "reason": "useQuery error is fully handled: `isError` and `error` are both destructured, and a useEffect (lines 41-44) checks `isError && error` then calls toast.error() and console.error(). Error handling is explicit and complete.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    },
+    {
+      "fingerprint": "abcab90fe8c7581e0cdb369fc3507211",
+      "package": "@tanstack/react-query",
+      "postconditionId": "query-error-unhandled",
+      "filePath": "components/TasksPage/TasksList.tsx",
+      "lineNumber": 30,
+      "reason": "useQuery error is surfaced via the `error` return value (destructured on same line). React Query catches queryFn throws internally and exposes them through error state — try-catch postcondition does not apply to React Query hooks.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    },
+    {
+      "fingerprint": "2ef4eac223555642c1c8524037788c0f",
+      "package": "@tanstack/react-query",
+      "postconditionId": "query-error-unhandled",
+      "filePath": "components/Files/FileInfoDialog.tsx",
+      "lineNumber": 41,
+      "reason": "queryFn returns [] on !response.ok (graceful degradation, no throw path). Error value is destructured. React Query error state pattern — try-catch postcondition does not apply.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    },
+    {
+      "fingerprint": "108199158c234471986899b5e505a7b4",
+      "package": "react-hook-form",
+      "postconditionId": "missing-form-provider",
+      "filePath": "components/Account/ArtistInstructionTextArea.tsx",
+      "lineNumber": 34,
+      "reason": "useFormContext() must be called unconditionally per React Rules of Hooks. The component is designed to work with or without a FormProvider: all usage is null-guarded via `const isFullyHooked = name && hookToForm && formContext`. hookToForm prop defaults false; no crash path exists.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    },
+    {
+      "fingerprint": "e73029767db09cb13133ee6180d71dd6",
+      "package": "react-hook-form",
+      "postconditionId": "missing-form-provider",
+      "filePath": "components/Input.tsx",
+      "lineNumber": 38,
+      "reason": "useFormContext() must be called unconditionally per React Rules of Hooks. All usage is null-guarded via `const isFullyHooked = Boolean(name && hookToForm && formContext)`. hookToForm prop defaults false; formContext null path is fully handled.",
+      "suppressedAt": "2026-04-02T20:00:00Z"
+    }
+  ]
+}
