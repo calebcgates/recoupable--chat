@@ -27,7 +27,7 @@ const TasksList: React.FC<TasksListProps> = ({ tasks, isLoading, isError }) => {
   );
 
   // Batch fetch emails for all task owners
-  const { data: accountEmails = [] } = useQuery<AccountEmail[]>({
+  const { data: accountEmails = [], error } = useQuery<AccountEmail[]>({
     queryKey: ["task-owner-emails", accountIds],
     queryFn: async () => {
       if (accountIds.length === 0 || !userData) return [];

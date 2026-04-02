@@ -38,7 +38,7 @@ export default function FileInfoDialog({ file, open, onOpenChange }: FileInfoDia
   const canEdit = file ? isTextFile(file.file_name) : false;
 
   // Fetch owner email
-  const { data: emails } = useQuery<AccountEmail[]>({
+  const { data: emails, error } = useQuery<AccountEmail[]>({
     queryKey: ["file-owner-email", ownerAccountId, artistAccountId],
     queryFn: async () => {
       if (!ownerAccountId || !artistAccountId || !userData) return [];

@@ -18,7 +18,7 @@ type CreatorResponse = {
 };
 
 const AgentCreator = ({ creatorId, className }: AgentCreatorProps) => {
-  const { data } = useQuery<CreatorResponse>({
+  const { data, error } = useQuery<CreatorResponse>({
     queryKey: ["agent-creator", creatorId],
     queryFn: async () => {
       const res = await fetch(`/api/agent-creator?creatorId=${creatorId}`, { cache: "no-store" });
