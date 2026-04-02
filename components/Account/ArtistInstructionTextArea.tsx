@@ -37,7 +37,7 @@ function ArtistInstructionTextArea({
   const fieldError = isFullyHooked && formContext?.formState?.errors?.[name];
 
   useEffect(() => {
-    if (name && hookToForm) {
+    if (name && hookToForm && formContext) {
       formContext.setValue(name, value);
     }
   }, [value, name, formContext, hookToForm]);
