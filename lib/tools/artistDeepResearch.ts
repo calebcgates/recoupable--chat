@@ -20,12 +20,20 @@ const artistDeepResearch = tool({
     artist_account_id: z.string().describe("Artist account ID to research"),
   }),
   execute: async ({ artist_account_id }) => {
-    const data = await getArtistSocials(artist_account_id);
-    return {
-      artistSocials: data,
-      artist_account_id,
-      success: true,
-    };
+    try {
+      const data = await getArtistSocials(artist_account_id);
+      return {
+        artistSocials: data,
+        artist_account_id,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to research artist",
+      };
+    }
   },
 });
 

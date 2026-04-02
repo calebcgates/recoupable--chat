@@ -21,24 +21,32 @@ export const generateMermaidDiagram = tool({
       ),
   }),
   execute: async ({ context }) => {
-    const result = await generateText({
-      model: ANTHROPIC_MODEL,
-      system: MERMAID_INSTRUCTIONS_PROMPT,
-      prompt: `Generate a Mermaid diagram for the following context: ${context}
+    try {
+      const result = await generateText({
+        model: ANTHROPIC_MODEL,
+        system: MERMAID_INSTRUCTIONS_PROMPT,
+        prompt: `Generate a Mermaid diagram for the following context: ${context}
             `,
-    });
+      });
 
-    const extractedMermaid = result.text.match(
-      /```mermaid\\n?([\\s\\S]*?)\\n?```/
-    );
-    const mermaidContent = extractedMermaid
-      ? extractedMermaid[0]
-      : result.text.trim();
+      const extractedMermaid = result.text.match(
+        /```mermaid\\n?([\\s\\S]*?)\\n?```/
+      );
+      const mermaidContent = extractedMermaid
+        ? extractedMermaid[0]
+        : result.text.trim();
 
-    return {
-      content: [{ type: "text", text: mermaidContent }],
-      isError: false,
-    };
+      return {
+        content: [{ type: "text", text: mermaidContent }],
+        isError: false,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate diagram";
+      return {
+        content: [{ type: "text", text: errorMessage }],
+        isError: true,
+      };
+    }
   },
 });
 

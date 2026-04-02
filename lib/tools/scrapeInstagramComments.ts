@@ -27,8 +27,16 @@ Note:
 - Rate limits may apply based on Instagram's restrictions
 - Data is scraped ethically, only collecting publicly available information`,
   inputSchema: schema,
-  execute: async ({ postUrls }): Promise<ApifyScraperResult> => {
-    return await runInstagramCommentsScraper(postUrls);
+  execute: async ({ postUrls }) => {
+    try {
+      return await runInstagramCommentsScraper(postUrls);
+    } catch (error) {
+      return {
+        success: false,
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to scrape Instagram comments",
+      };
+    }
   },
 });
 

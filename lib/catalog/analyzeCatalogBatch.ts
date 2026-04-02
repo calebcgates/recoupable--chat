@@ -11,16 +11,17 @@ export async function analyzeCatalogBatch(
   songs: CatalogSong[],
   criteria: string
 ): Promise<CatalogSong[]> {
-  // Use AI to select relevant songs from this batch
-  const { object } = await generateObject({
-    model: DEFAULT_MODEL,
-    schema: z.object({
-      selected_song_isrcs: z
-        .array(z.string())
-        .describe("Array of song ISRCs that match the criteria"),
-    }),
-    prompt: `Given these songs and the criteria: "${criteria}", select the song ISRCs that are most relevant.
-          
+  try {
+    // Use AI to select relevant songs from this batch
+    const { object } = await generateObject({
+      model: DEFAULT_MODEL,
+      schema: z.object({
+        selected_song_isrcs: z
+          .array(z.string())
+          .describe("Array of song ISRCs that match the criteria"),
+      }),
+      prompt: `Given these songs and the criteria: "${criteria}", select the song ISRCs that are most relevant.
+
 Songs:
 ${JSON.stringify(
   songs.map((s) => ({
@@ -33,10 +34,13 @@ ${JSON.stringify(
 )}
 
 Return only the ISRCs of songs that match the criteria.`,
-  });
+    });
 
-  // Filter songs based on AI selection
-  return songs.filter((song) =>
-    (object.selected_song_isrcs as string[]).includes(song.isrc)
-  );
+    // Filter songs based on AI selection
+    return songs.filter((song) =>
+      (object.selected_song_isrcs as string[]).includes(song.isrc)
+    );
+  } catch {
+    return [];
+  }
 }

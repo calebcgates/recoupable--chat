@@ -114,8 +114,16 @@ Note:
 - Rate limits may apply based on Instagram's restrictions
 - Data is scraped ethically, only collecting publicly available information`,
   inputSchema: schema,
-  execute: async ({ handles }): Promise<ApifyScraperResult> => {
-    return runInstagramProfilesScraper(handles);
+  execute: async ({ handles }) => {
+    try {
+      return await runInstagramProfilesScraper(handles);
+    } catch (error) {
+      return {
+        success: false,
+        status: "error",
+        message: error instanceof Error ? error.message : "Failed to scrape Instagram profiles",
+      };
+    }
   },
 });
 
